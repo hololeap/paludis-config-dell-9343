@@ -1,0 +1,53 @@
+#!/bin/bash
+
+FILE_PERMS=0660
+DIR_PERMS=0770
+
+USER=paludisbuild
+GROUP=paludisbuild
+
+REPO_DIR=/var/db/paludis/repositories
+TMP_DIR=/var/tmp/paludis
+
+# TMP_DIR is not included in PATHS (it must be handled differently)
+PATHS=(/{etc,var/{cache,db,log}}/paludis /var/log/paludis.log )
+
+BAD_FILES=/tmp/bad_files
+BAD_DIRS=/tmp/bad_dirs
+BAD_OWNER=/tmp/bad_owner
+
+change_perms() {
+    [[ -s $BAD_FILES ]] && xargs -0 chmod -v $FILE_PERMS < $BAD_FILES 
+    [[ -s $BAD_DIRS ]]  && xargs -0 chmod -v $DIR_PERMS < $BAD_DIRS 
+    [[ -s $BAD_OWNER ]] && xargs -0 chown -v $USER:$GROUP < $BAD_OWNER
+
+    rm -f $BAD_FILES $BAD_DIRS $BAD_OWNER
+}
+
+
+# Skip the permissions in REPO_DIR
+find ${PATHS[*]} -path $REPO_DIR -prune -o \
+            \( ! \( -user $USER -group $GROUP \) -fprint0 $BAD_OWNER \) , \
+		    \( -type f ! -perm $FILE_PERMS -fprint0 $BAD_FILES -o \
+                       -type d ! -perm $DIR_PERMS -fprint0 $BAD_DIRS \)
+change_perms
+
+# Change permissions on non-synced repos
+find $REPO_DIR/{installed{,-unpackaged},local} \
+            \( ! \( -user $USER -group $GROUP \) -fprint0 $BAD_OWNER \) , \
+		    \( -type f ! -perm $FILE_PERMS -fprint0 $BAD_FILES -o \
+                       -type d ! -perm $DIR_PERMS -fprint0 $BAD_DIRS \)
+change_perms
+
+# Change user/group (but not permissions) for synced repos
+find $REPO_DIR -path $REPO_DIR/installed -prune -o \
+               -path $REPO_DIR/installed-unpackaged -prune -o \
+               -path $REPO_DIR/local -prune -o \
+               ! \( -user $USER -group $GROUP \) -fprint0 $BAD_OWNER
+change_perms
+
+# Change user/group/permissions for major directories (not descendants)
+find $REPO_DIR $REPO_DIR/* $TMP_DIR -maxdepth 0 -type d \
+     \( ! \( -user $USER -group $GROUP \) -fprint0 $BAD_OWNER \) , \
+     \( ! -perm $DIR_PERMS -fprint0 $BAD_DIRS \)
+change_perms

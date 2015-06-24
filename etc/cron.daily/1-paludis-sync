@@ -1,0 +1,6 @@
+#!/bin/bash
+
+pushd /tmp
+sudo -u paludisbuild -g paludisbuild cave sync
+sudo -u paludisbuild -g paludisbuild cave manage-search-index
+popd

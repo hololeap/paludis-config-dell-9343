@@ -1,0 +1,6 @@
+CHOST="x86_64-pc-linux-gnu"
+CFLAGS="-O2 -pipe -march=core-avx2 -mabm -madx -mavx256-split-unaligned-load -mavx256-split-unaligned-store -mprfchw -mrdseed"
+CXXFLAGS="${CFLAGS}"
+LDFLAGS="-Wl,-O1 -Wl,--as-needed"
+MAKEOPTS="-j5"
+
