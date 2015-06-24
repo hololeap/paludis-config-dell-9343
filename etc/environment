@@ -1,0 +1,14 @@
+#
+# This file is parsed by pam_env module
+#
+# Syntax: simple "KEY=VAL" pairs on separate lines
+#
+
+
+# Stuff for Paludis
+CAVE_RESOLVE_OPTIONS="--resume-file /var/cache/paludis/resume-file"
+CAVE_RESUME_OPTIONS="--resume-file /var/cache/paludis/resume-file"
+CAVE_SEARCH_OPTIONS="--index /var/cache/paludis/search-index.sqlite3"
+CAVE_MANAGE_SEARCH_INDEX_OPTIONS="--create /var/cache/paludis/search-index.sqlite3"
+###
+
